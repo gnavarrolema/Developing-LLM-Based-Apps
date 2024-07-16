@@ -60,7 +60,7 @@ This project is designed to develop applications based on Large Language Models 
     
 2.  **Start the Application**:
        
-    `python backend/app.py` 
+    `python -m chainlit run -w backend/app.py` 
 
 ## Contact
 
