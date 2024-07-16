@@ -1,6 +1,7 @@
 # Developing LLM-Based Apps
 
-![alt text](ChatbotUI.png)
+![image](https://github.com/user-attachments/assets/440f0c9f-427c-4068-927f-63ae7cd84ec1)
+
 
 ## Description
 
