@@ -36,8 +36,8 @@ This project is designed to develop applications based on Large Language Models 
 
 1.  **Clone the repository**:
        
-    `git clone https://github.com/your-username/your-project.git  
-    cd your-project` 
+    `git clone https://github.com/gnavarrolema/Developing-LLM-Based-Apps.git 
+    cd Developing-LLM-Based-Apps` 
     
 2.  **Create and activate a virtual environment**:
         
