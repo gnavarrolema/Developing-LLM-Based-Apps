@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+import os # Asegúrate de importar os
 import pandas as pd
 from langchain.docstore.document import Document
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -63,9 +64,6 @@ class ETLProcessor:
         self.collection_name = collection_name
         self.persist_directory = persist_directory
 
-        # TODO: Create a text splitter using the
-        # `langchain.text_splitter.RecursiveCharacterTextSplitter` class.
-        # Hint: Use the `chunk_size` and `chunk_overlap` parameters.
         self.text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap, length_function=len, add_start_index=True)
 
     def load_data(self) -> pd.DataFrame:
@@ -77,16 +75,24 @@ class ETLProcessor:
         df : pd.DataFrame
             Jobs descriptions with extra metadata from the dataset.
         """
-        # TODO: Load the dataset from the `dataset_path` using the
-        # `pandas.read_csv()` function.
-        # Keep only the following columns: "description", "Employment type",
-        # "Seniority level", "company", "location", "post_url", "title".
-        # Discard the rest.
-        # Drop the entire row if any nan values are found on some of the
-        # chosen columns.
-        df = pd.read_csv(self.dataset_path)
-        df = df[["description", "Employment type", "Seniority level", "company", "location", "post_url", "title"]]
-        df.dropna(subset=["description", "Employment type", "Seniority level", "company", "location", "post_url", "title"], inplace=True)
+        if not os.path.exists(self.dataset_path):
+            raise FileNotFoundError(
+                f"Dataset file not found: {self.dataset_path}"
+            )
+        try:
+            df = pd.read_csv(self.dataset_path)
+        except Exception as e:
+            raise ValueError(
+                f"Error reading CSV file {self.dataset_path}: {e}"
+            )
+
+        required_columns = ["description", "Employment type", "Seniority level", "company", "location", "post_url", "title"]
+        missing_columns = [col for col in required_columns if col not in df.columns]
+        if missing_columns:
+            raise ValueError(f"Dataset CSV is missing required columns: {', '.join(missing_columns)}")
+
+        df = df[required_columns]
+        df.dropna(subset=required_columns, inplace=True)
         return df
 
     def create_documents(self, descriptions: pd.DataFrame) -> List[Document]:

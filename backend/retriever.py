@@ -28,6 +28,6 @@ class Retriever:
         self.vector_store = load_vector_store()
 
     def search(self, query: str, k: int = 4) -> List[Document]:
-        kits = self.vector_store.similarity_search(query=query, k=k)
+        retrieved_documents = self.vector_store.similarity_search(query=query, k=k)
 
-        return kits
+        return retrieved_documents

@@ -66,15 +66,20 @@ class ChatAssistant:
         response : str
             The response from the chat assistant.
         """
-        # Invoke the chain to get a response
-        response = self.model.invoke({"human_input": human_input})
-        
-        # Ensure consistent return format (should return the text string)
-        if isinstance(response, dict) and "text" in response:
-            return response["text"]
-        
-        # For backwards compatibility, handle both dictionary and string responses
-        return response.get("output", response)
+        try:
+            # Invoke the chain to get a response
+            response = self.model.invoke({"human_input": human_input})
+            
+            # Ensure consistent return format (should return the text string)
+            if isinstance(response, dict) and "text" in response:
+                return response["text"]
+            
+            # For backwards compatibility, handle both dictionary and string responses
+            # For LLMChain, "text" is the default output key. "output" might be for other chains/agents.
+            return response.get("text", str(response)) # Prefer "text" for LLMChain
+        except Exception as e:
+            # Consider logging the error here as well
+            return f"Lo siento, ocurrió un error al procesar tu solicitud: {str(e)}"
 
 
 if __name__ == "__main__":

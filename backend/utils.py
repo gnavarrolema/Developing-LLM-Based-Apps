@@ -41,12 +41,4 @@ def extract_text_from_pdf(pdf_bytes: BytesIO) -> str:
     if not has_common_words:
         raise ValueError("El texto extraído puede no ser legible. Verifica el formato del PDF.")
     
-    # Informar estadísticas básicas
-    word_count = len(pdf_text.split())
-    stats = {
-        "num_pages": num_pages,
-        "word_count": word_count,
-        "chars_count": len(pdf_text)
-    }
-    
     return pdf_text

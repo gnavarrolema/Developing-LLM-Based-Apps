@@ -44,7 +44,7 @@ def build_cover_letter_writing(llm, resume):
 class JobsFinderAgent:
     def __init__(self, resume, llm_model, api_key, temperature=0, history_length=3):
         """
-        Initialize the JobsFinderSimple class.
+        Initialize the JobsFinderAgent class.
         """
         self.llm_model = llm_model
         self.resume = resume

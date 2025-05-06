@@ -1,125 +1,154 @@
-#  LLM-Powered Apps Final Project
+Este proyecto implementa una aplicación de chat interactiva construida con Chainlit, que ofrece varios asistentes impulsados por Modelos de Lenguaje Grandes (LLMs). Incluye un asistente de chat genérico tipo ChatGPT, un buscador de empleos que utiliza RAG (Retrieval Augmented Generation) sobre una base de datos de ofertas de trabajo, y un agente de búsqueda de empleos.
 
-## The Business problem
+## Características Principales
 
-This project is related to LLMs. You want to create an app that is able to take a person's profile and look for job oportunities that would match it.
+   **Múltiples Asistentes:**
+   *   **Vanilla ChatGPT:** Un clon básico de ChatGPT para conversaciones generales.
+   *   **Jobs finder Assistant:** Un asistente que te ayuda a encontrar ofertas de trabajo relevantes basadas en tu currículum y tus preferencias. Utiliza una base de datos vectorial de ofertas de empleo.
+   *   **Jobs Agent:** Un agente más avanzado para la búsqueda de empleos (la funcionalidad específica del agente dependerá de su implementación en `models/jobs_finder_agent.py`).
+   **Carga de Currículum:** Los asistentes de búsqueda de empleo permiten cargar un currículum en formato PDF para personalizar las búsquedas.
+   **Proceso ETL:** Incluye un script para procesar un dataset de ofertas de trabajo (CSV), generar embeddings y almacenarlos en una base de datos vectorial ChromaDB.
+   **Interfaz de Usuario con Chainlit:** Interfaz de chat amigable y fácil de usar.
+   **Configuración Flexible:** Utiliza variables de entorno y un archivo `.env` para la configuración.
 
-## About the data
+## Estructura del Proyecto
 
-In this project, we will work exclusively with a file `jobs.csv`.
+```
+LLM_App-Gustavo_Navarro/
+ ├── backend/
+ │   ├── __init__.py
+ │   ├── app.py            # Aplicación principal Chainlit
+ │   ├── config.py         # Configuración del proyecto
+ │   ├── etl.py            # Script para el proceso ETL (cargar datos a ChromaDB)
+ │   ├── models/           # Módulos de los asistentes
+ │   │   ├── __init__.py
+ │   │   ├── chatgpt_clone.py
+ │   │   ├── jobs_finder.py
+ │   │   └── jobs_finder_agent.py
+ │   ├── retriever.py      # Lógica para buscar en ChromaDB
+ │   └── utils.py          # Funciones de utilidad (ej. extracción de PDF)
+ ├── chroma/               # Directorio para la base de datos ChromaDB (creado por ETL)
+ ├── dataset/
+ │   └── jobs.csv          # Dataset de ejemplo con ofertas de trabajo
+ ├── .env.example          # Ejemplo de archivo de configuración de entorno
+ ├── requirements.txt      # Dependencias del proyecto
+ └── README.md             # Este archivo
+```
 
-You don't have to worry about downloading the data, it is already present in the dataset folder.
+## Requisitos Previos
 
-This is a dataset for **creating a job-searching app**.
+*   Python 3.8 o superior
+*   Una clave API de OpenAI (si se utiliza el modelo de OpenAI)
 
-## Technical aspects
+## Configuración
 
-To develop this Machine Learning model you will have to primary interact with the Jupyter notebook provided, called `AnyoneAI - Sprint Project 05.ipynb`. This notebook will guide you through all the steps you have to follow and the code you have to complete in the different parts of the project, also marked with a `TODO` comment.
+1.  **Clonar el repositorio (si aplica):**
+    ```bash
+    git clone https://github.com/gnavarrolema/Developing-LLM-Based-Apps
+    cd LLM_App-Gustavo_Navarro
+    ```
 
-## Install
+2.  **Crear un entorno virtual (recomendado):**
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # En Windows: venv\Scripts\activate
+    ```
++
+3.  **Instalar dependencias:**
+    Asegúrate de tener un archivo `requirements.txt` con todas las dependencias. Un ejemplo podría ser:
+    ```txt
+    # requirements.txt
+    chainlit
+    langchain
+    langchain-openai
+    langchain-community
+    pandas
+    pypdf2
+    sentence-transformers
+    chromadb
+    python-dotenv
+    pydantic-settings
+    tqdm
+    # Añade otras dependencias específicas de tus modelos si es necesario
+    ```
+    Luego instala con:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-A `requirements.txt` file is provided with all the needed Python libraries for running this project. For installing the dependencies just run:
+4.  **Configurar variables de entorno:**
+    Copia el archivo `.env.example` a `.env` y edítalo con tus configuraciones:
+    ```bash
+    cp .env.example .env
+    ```
+    Contenido del `.env` (ejemplo):
+    ```env
+    OPENAI_API_KEY="tu_clave_api_de_openai"
+    OPENAI_LLM_MODEL="gpt-3.5-turbo"
+    # Otras configuraciones de config.py pueden ser sobrescritas aquí si es necesario
+    ```
+
+5.  **Dataset:**
+    Asegúrate de que el archivo `dataset/jobs.csv` exista y tenga el formato esperado por `backend/etl.py` (columnas: `description`, `Employment type`, `Seniority level`, `company`, `location`, `post_url`, `title`).
+
+## Uso
+
+### 1. Ejecutar el Proceso ETL
+
+Este paso es necesario para crear la base de datos vectorial con las ofertas de trabajo. Ejecuta el siguiente comando desde el directorio raíz del proyecto (`LLM_App-Gustavo_Navarro/`):
 
 ```bash
-$ pip install -r requirements.txt
+python -m backend.etl --batch-size 32 --chunk-size 500 --chunk-overlap 100
 ```
 
-*Note:* We encourage you to install those inside a virtual environment.
+*   `--batch-size`: Número de documentos a procesar en cada lote.
+*   `--chunk-size`: Tamaño de los trozos en los que se dividen los documentos.
+*   `--chunk-overlap`: Superposición entre trozos.
+*   `--limit` (opcional): Limita el número de documentos a procesar del CSV (ej. `--limit 1000`).
 
-## Run Project
+Esto creará (o actualizará) la base de datos en el directorio `chroma/`.
 
-To run the ETL pipeline and create a chroma vector database once you finish completing the code, run:
+### 2. Ejecutar la Aplicación Chainlit
+
+Una vez que el proceso ETL haya finalizado (o si solo quieres usar el "Vanilla ChatGPT"), puedes iniciar la aplicación Chainlit. Ejecuta el siguiente comando desde el directorio raíz del proyecto:
 
 ```bash
-$ python backend/etl.py
+chainlit run backend/app.py -w
 ```
 
-## Run Project
+*   `backend/app.py`: Es el punto de entrada de tu aplicación Chainlit.
+*   `-w` (o `--watch`): Habilita la recarga automática cuando se detectan cambios en los archivos.
 
-In order to execute the project you need to launch a Jupyter notebook server running:
+Abre tu navegador y ve a la dirección que Chainlit indique (normalmente `http://localhost:8000`).
 
-```bash
-$ python -m chainlit run -w backend/app.py
+## Tecnologías Utilizadas
+
+*   **Python**
+*   **Chainlit:** Para la interfaz de usuario de chat.
+*   **Langchain:** Framework para construir aplicaciones con LLMs.
+*   **OpenAI API:** (Opcional, para los modelos de OpenAI).
+*   **Sentence Transformers:** Para la generación de embeddings.
+*   **ChromaDB:** Base de datos vectorial para almacenar y buscar embeddings.
+*   **Pandas:** Para la manipulación de datos (en el ETL).
+*   **PyPDF2:** Para la extracción de texto de archivos PDF.
+*   **Pydantic:** Para la validación de configuraciones.
+
+## Posibles Mejoras / TODO
+
+*   Implementar tests unitarios y de integración.
+*   Mejorar la robustez del parseo de PDFs.
+*   Añadir más opciones de personalización para los asistentes.
+*   Explorar otros modelos de embedding o LLMs.
+*   Desplegar la aplicación en una plataforma (ej. Hugging Face Spaces, Streamlit Cloud, etc.).
+
+## Contribuciones
+
+Las contribuciones son bienvenidas. Por favor, abre un issue o un pull request para discutir cambios.
+
+## Licencia
+
+Este proyecto es de código abierto (especifica una licencia si lo deseas, ej. MIT License).
+
+---
+*Creado por Gustavo Navarro*
 ```
-
-## Code Style
-
-Following a style guide keeps the code's aesthetics clean and improves readability, making contributions and code reviews easier. Automated Python code formatters make sure your codebase stays in a consistent style without any manual work on your end. If adhering to a specific style of coding is important to you, employing an automated to do that job is the obvious thing to do. This avoids bike-shedding on nitpicks during code reviews, saving you an enormous amount of time overall.
-
-We use [Black](https://black.readthedocs.io/) for automated code formatting in this project, you can run it with:
-
-```console
-$ black --line-length=88 .
-```
-
-Wanna read more about Python code style and good practices? Please see:
-- [The Hitchhiker’s Guide to Python: Code Style](https://docs.python-guide.org/writing/style/)
-- [Google Python Style Guide](https://google.github.io/styleguide/pyguide.html)
-
-## Tests
-
-We've added some basic tests for the backend service:
-
-- test_utils.py for utils.py.
-- test_chatgpt_clone.py for chatgpt_clone.py.
-- test_job_finder_agent.py for job_finder_agent.py.
-
-To run just execute:
-
-```bash
-$ python -m pytest tests
-```
-
-If you want to learn more about testing Python code, please read:
-- [Effective Python Testing With Pytest](https://realpython.com/pytest-python-testing/)
-- [The Hitchhiker’s Guide to Python: Testing Your Code](https://docs.python-guide.org/writing/tests/)
-
-
-## Structure to be completed
-
-WEEK 1:
-
-DAY 1:
-
-- Get all the requirements installed in a virtual env and the chainlit app running.
-- Complete the function extract_text_from_pdf() at backend/utils.py.
-    - Use PyPDF2.PdfReader to open the input `pdf_bytes` and extract the text from each page appended to `pdf_text`.
-
-DAY 2:
-
-- Complete the code for the class ChatAssistant() at backend/models/chatgpt_clone.py:
-    - Create a string template for the chat assistant.
-    - Create a prompt template using the string template created above.
-    - Create an instance of `langchain.chat_models.ChatOpenAI` with the appropriate settings.
-    - Create an instance of `langchain.chains.LLMChain` with the appropriate settings.
-
-WEEK 2:
-
-DAY 1:
-
-- Complete the code for the ETLProcessor() class at backend/etl.py.
-    - Create a text splitter using the `langchain.text_splitter.RecursiveCharacterTextSplitter` class.
-    - Load the dataset from the `dataset_path` using the `pandas.read_csv()` function.
-- Run ingestion/etl.py to create the initial dataset with vector embeddings.
-
-DAY 2:
-
-- Complete the code for the JobsFinderAssistant() class at backend/models/jobs_finder.py.
-    - Create a string template for the chat assistant.
-    - Create a prompt template using the string template created above.
-    - Create an instance of `langchain.chat_models.ChatOpenAI` with the appropriate settings.
-    - Create an instance of `langchain.chains.LLMChain` with the appropriate settings.
-    - Use the human input and the user resume summary to search for jobs.
-
-WEEK 3:
-
-DAY 1:
-
-- Complete the function build_cover_letter_writing() at backend/models/jobs_finder_agent.py.
-    - Create a string template for this chain.
-    - Create a prompt template using the string template created above.
-    - Create an instance of `langchain.chains.LLMChain` with the appropriate settings.
-
-DAY 2:
-
-- Take the profile + job found and make a personalized message to the recruiter.
