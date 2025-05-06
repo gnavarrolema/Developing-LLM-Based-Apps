@@ -2,7 +2,6 @@ from langchain import hub
 from langchain.agents import AgentExecutor, Tool, create_openai_functions_agent
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
-from langchain_core.messages import AIMessage, HumanMessage
 from langchain_openai import ChatOpenAI
 from langchain.memory import ConversationBufferWindowMemory
 
@@ -18,7 +17,6 @@ def build_job_finder(job_finder_assistant):
 
 def build_cover_letter_writing(llm, resume):
     def cover_letter_writing(job_description: str):
-        # Crear una plantilla de cadena para la carta de presentación
         template = """
         You are an AI assistant tasked with writing a cover letter for a job application.
         
@@ -45,6 +43,23 @@ class JobsFinderAgent:
     def __init__(self, resume, llm_model, api_key, temperature=0, history_length=3):
         """
         Initialize the JobsFinderAgent class.
+        
+        Parameters
+        ----------
+        resume : str
+            The resume of the user.
+            
+        llm_model : str
+            The model name.
+            
+        api_key : str
+            The API key for accessing the LLM model.
+            
+        temperature : float
+            The temperature parameter for generating responses.
+            
+        history_length : int, optional
+            The length of the conversation history to be stored in memory. Default is 3.
         """
         self.llm_model = llm_model
         self.resume = resume
@@ -58,7 +73,7 @@ class JobsFinderAgent:
             temperature=temperature,
         )
 
-        # Usar memoria integrada en lugar de gestión manual
+        # Usar memoria integrada de LangChain
         self.memory = ConversationBufferWindowMemory(
             k=history_length,
             return_messages=True,
@@ -88,7 +103,6 @@ class JobsFinderAgent:
             ),
         ]
 
-        # Agregar manejo de excepciones para la llamada al hub
         try:
             prompt = hub.pull("hwchase17/openai-functions-agent")
         except Exception as e:
@@ -117,6 +131,16 @@ class JobsFinderAgent:
     def predict(self, human_input: str) -> str:
         """
         Generate a response to a human input.
+        
+        Parameters
+        ----------
+        human_input : str
+            The human input to the chat assistant.
+            
+        Returns
+        -------
+        str
+            The response from the chat assistant.
         """
         try:
             # Usar memoria integrada de LangChain

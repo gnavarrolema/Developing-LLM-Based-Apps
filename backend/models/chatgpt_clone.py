@@ -38,13 +38,18 @@ class ChatAssistant:
 
         # Create the OpenAI chat model with consistent parameters
         self.llm = ChatOpenAI(
-            model=llm_model,  # Usar 'model' en lugar de mezclar model/model_name
-            api_key=api_key,   # Usar 'api_key' consistentemente
+            model=llm_model,
+            api_key=api_key,
             temperature=temperature
         )
 
         # Create an LLM chain with memory
-        self.memory = ConversationBufferWindowMemory(k=history_length, input_key="human_input", memory_key="history")
+        self.memory = ConversationBufferWindowMemory(
+            k=history_length, 
+            input_key="human_input", 
+            memory_key="history"
+        )
+        
         self.model = LLMChain(
             llm=self.llm, 
             prompt=self.prompt, 
@@ -70,30 +75,14 @@ class ChatAssistant:
             # Invoke the chain to get a response
             response = self.model.invoke({"human_input": human_input})
             
-            # Ensure consistent return format (should return the text string)
+            # Return text content consistently
             if isinstance(response, dict) and "text" in response:
                 return response["text"]
             
-            # For backwards compatibility, handle both dictionary and string responses
-            # For LLMChain, "text" is the default output key. "output" might be for other chains/agents.
-            return response.get("text", str(response)) # Prefer "text" for LLMChain
+            return response.get("text", str(response))
+            
         except Exception as e:
-            # Consider logging the error here as well
+            # Log the error for debugging
+            import logging
+            logging.error(f"Error processing request: {str(e)}")
             return f"Lo siento, ocurrió un error al procesar tu solicitud: {str(e)}"
-
-
-if __name__ == "__main__":
-    # Create an instance of ChatAssistant with appropriate settings
-    chat_assistant = ChatAssistant(
-        llm_model=settings.OPENAI_LLM_MODEL,
-        api_key=settings.OPENAI_API_KEY,
-        temperature=0,
-        history_length=2,
-    )
-
-    # Use the instance to generate a response
-    output = chat_assistant.predict(
-        human_input="what is the answer to life the universe and everything?"
-    )
-
-    print(output)
