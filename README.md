@@ -145,10 +145,6 @@ Abre tu navegador y ve a la dirección que Chainlit indique (normalmente `http:/
 
 Las contribuciones son bienvenidas. Por favor, abre un issue o un pull request para discutir cambios.
 
-## Licencia
-
-Este proyecto es de código abierto (especifica una licencia si lo deseas, ej. MIT License).
-
 ---
 *Creado por Gustavo Navarro*
 ```
