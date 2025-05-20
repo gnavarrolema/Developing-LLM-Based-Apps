@@ -133,14 +133,6 @@ Abre tu navegador y ve a la dirección que Chainlit indique (normalmente `http:/
 *   **PyPDF2:** Para la extracción de texto de archivos PDF.
 *   **Pydantic:** Para la validación de configuraciones.
 
-## Posibles Mejoras / TODO
-
-*   Implementar tests unitarios y de integración.
-*   Mejorar la robustez del parseo de PDFs.
-*   Añadir más opciones de personalización para los asistentes.
-*   Explorar otros modelos de embedding o LLMs.
-*   Desplegar la aplicación en una plataforma (ej. Hugging Face Spaces, Streamlit Cloud, etc.).
-
 ## Contribuciones
 
 Las contribuciones son bienvenidas. Por favor, abre un issue o un pull request para discutir cambios.
